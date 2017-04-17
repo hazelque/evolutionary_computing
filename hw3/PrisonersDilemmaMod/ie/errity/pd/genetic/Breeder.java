@@ -6,6 +6,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.BitSet;
 import java.util.Random;
+import java.util.Collections;
 
 
 /**
@@ -55,12 +56,11 @@ public class Breeder extends JPanel
 		else
 			rand = new Random(seed); //uses seed set in rules for repeatability
     }
-
 	
     /**
      *Breeds the next generation (panmictic mating) of an array of 
-     *{@link  ie.errity.pd.Prisoner Prisoners} 
-     *@param c	initial population (raw fitness of population must be calcualted previously)
+     *{@link  ie.errity.pd.Prisoner Prisoners}
+     *@param c	initial population (raw fitness of population must be calculated previously)
      *@return the next generation
      */
     public Prisoner[] Breed(Prisoner[] c) {
@@ -145,6 +145,85 @@ public class Breeder extends JPanel
 		curPopulation = Selected;
 		repaint();	//update display (if any)
 		return curPopulation; //return the bred population
+    }
+
+
+	/**
+	 * Enables fitness proportional selection with sigma scaling and stochastic
+	 * universal sampling, plus optional elitism.
+	 * @param m - number of most fit individuals to be copied over into the next
+	 *          generation
+     * @param c - initial population
+	 */
+	public void fitnessProportionateSelection(int m, Prisoner[] c) {
+		curPopulation = c;
+		popSize = curPopulation.length;
+		Prisoner Selected[] = new Prisoner[popSize];
+
+		// When elitism is enabled
+		if(selParam == 1) {
+			Prisoner Elite[] = new Prisoner[m];
+			Collections.sort(curPopulation, Collections.reverseOrder());
+			System.arraycopy(curPopulation, 0, Elite,0 ,m);
+            for(int i = 0; i < m; i++) {
+                System.out.println(Elite[i].getScore());
+            }
+		}
+
+        /* re-evaluate the fitnesses of all individuals using the sigma scaling
+           method with the parameter given in the book */
+
+        // calculating the mean fitness
+        double totalFitness = 0;
+		for(int i = 0; i < popSize; i++) {
+		    totalFitness += curPopulation[i].getScore();
+        }
+        double meanFitness = totalFitness / popSize;
+
+		// calculate the variance and standard deviation
+        double sumFitnessDiff = 0;
+        for(int i = 0; i < popSize; i++) {
+            sumFitnessDiff += Math.pow(curPopulation[i].getScore() - meanFitness, 2);
+        }
+        double variance = sumFitnessDiff / popSize;
+        double std_deviation = Math.sqrt(variance);
+
+        // set fitness to new scaled fitness
+        for(int i = 0; i < popSize; i++) {
+            double newFitnessDouble = (curPopulation[i].getScore() - meanFitness) /
+                    (2 * std_deviation);
+            int newFitness = (int) newFitnessDouble;
+            curPopulation[i].setScore(newFitness);
+        }
+
+        /* fitness proportional selection with stochastic universal sampling */
+        int newTotalFitness = 0;
+        for(int i = 0; i < popSize; i++) {
+            newTotalFitness += curPopulation[i].getScore();
+        }
+        int numOffsprings = popSize - m;
+        double pointerDistance = newTotalFitness / numOffsprings;
+
+	}
+
+    /**
+     * A helper function used for FPS with SUS
+     * @param pop
+     * @param numPointers
+     * @return
+     */
+	public Prisoner[] RouletteWheelSelection(int pop, int numPointers) {
+	    Prisoner Keep[] = new Prisoner[pop];
+
+
+	    return Keep;
+    }
+
+    /**
+     * Enables tournament selection
+     */
+    public void tournamentSelection(){
+
     }
 
     /**
