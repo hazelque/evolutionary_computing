@@ -7,6 +7,7 @@ import java.awt.event.*;
 import java.util.BitSet;
 import java.util.Random;
 import java.util.Collections;
+import java.util.Arrays;
 
 
 /**
@@ -190,30 +191,42 @@ public class Breeder extends JPanel
 
         // set fitness to new scaled fitness
         for(int i = 0; i < popSize; i++) {
-            double newFitnessDouble = (curPopulation[i].getScore() - meanFitness) /
+            double newFitness = (curPopulation[i].getScore() - meanFitness) /
                     (2 * std_deviation);
-            int newFitness = (int) newFitnessDouble;
             curPopulation[i].setScore(newFitness);
         }
 
         /* fitness proportional selection with stochastic universal sampling */
-        int newTotalFitness = 0;
+        double newTotalFitness = 0;
         for(int i = 0; i < popSize; i++) {
             newTotalFitness += curPopulation[i].getScore();
         }
         int numOffsprings = popSize - m;
         double pointerDistance = newTotalFitness / numOffsprings;
 
+        /* setting a random starting point */
+        Random r = new Random();
+		double startPos = pointerDistance * r.nextDouble();
+
+		/* generate N equally spaced pointers */
+		double[] pointers = new double[numOffsprings];
+		for(int i = 0; i < numOffsprings; i++) {
+			double curPointer = startPos + i * pointerDistance;
+			pointers[i] = curPointer;
+		}
+
+		return RouletteWheelSelection(curPopulation, pointers);
 	}
 
     /**
      * A helper function used for FPS with SUS
      * @param pop
-     * @param numPointers
+     * @param pointers
      * @return
      */
-	public Prisoner[] RouletteWheelSelection(int pop, int numPointers) {
-	    Prisoner Keep[] = new Prisoner[pop];
+	public Prisoner[] RouletteWheelSelection(Prisoner[] pop, double[] pointers) {
+
+		Prisoner Keep[] = new Prisoner[pop];
 
 
 	    return Keep;
@@ -221,9 +234,29 @@ public class Breeder extends JPanel
 
     /**
      * Enables tournament selection
+	 * @param c - initial population
+	 * @param k - number of unique individuals to be chosen from each tournament
      */
-    public void tournamentSelection(){
+    public Prisoner[] tournamentSelection(Prisoner[] c, int k){
+    	curPopulation = c;
+    	popSize = curPopulation.length;
+		Prisoner keep[] = new Prisoner[popSize];
+		Prisoner round[] = new Prisoner[k];
 
+		// hosting popSize rounds of tournaments
+		for(int i = 0; i < popSize; i++) {
+			// for each tournament, choose k unique individuals
+			for(int j = 0; j < k ; j++) {
+				Random rand = new Random();
+				int value = rand.nextInt(popSize);
+				if (!Arrays.asList(round).contains(curPopulation[value])) {
+					round[j] = curPopulation[value];
+				}
+			}
+			// after picking k unique individuals, find the individual with the highest fitness
+		}
+
+		return keep;
     }
 
     /**

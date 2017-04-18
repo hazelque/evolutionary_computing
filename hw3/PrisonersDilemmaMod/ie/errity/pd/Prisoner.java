@@ -18,7 +18,7 @@ public class Prisoner implements Cloneable
     // 1st 7 reserved for 1st 3 rounds, final 64 for all combinations of actions on previous 3 rounds
     final private BitSet Strategy;  
 	
-    private int Score; 	//total payoffs recieved
+    private double Score; 	//total payoffs recieved
     private Moves m;	//table used to decode strategy
 	
     /**
@@ -130,18 +130,26 @@ public class Prisoner implements Cloneable
      *@param s the value to be added
      *@return the new score
      */
-    public int updateScore(int s)
+    public double updateScore(double s)
     {
-	Score = s + Score;
-	return Score;
+		Score = s + Score;
+		return Score;
     }
 	
     /**
      *Returns the Prisoner's current score
      *@return the Prisoner's current score
      */
-    public int getScore(){return Score;} 
-	
+    public double getScore(){return Score;}
+
+	/**
+	 * Set the Prisoner's current score
+	 * @param s the new score
+	 */
+	public void setScore(double s) {
+    	Score = s;
+	}
+
     /**
      *Set the Prisoner's current score
      *@param s the new score
