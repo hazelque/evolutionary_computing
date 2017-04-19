@@ -19,8 +19,8 @@ public class GraphPanel extends JPanel
     private int max;
     
     //Data displayed
-    private int [] data0;
-    private int [] data1;
+    private double [] data0;
+    private double [] data1;
     private double [] data2;
 	
 	//Labelling
@@ -47,8 +47,8 @@ public class GraphPanel extends JPanel
     	lastHeight1 = 0;
     	lastHeight2 = 0;
     	pos =-1;	//index of current data being displayed
-    	data0 = new int[length];
-    	data1 = new int[length];
+    	data0 = new double[length];
+    	data1 = new double[length];
     	data2 = new double[length];
     	for(int i = 0; i < length; i++)
 		{    		
@@ -187,7 +187,7 @@ public class GraphPanel extends JPanel
      *@param d1 data to add to Second plot
      *@param d2 data to add to Third plot
      */
-    public void addData(int d0,int d1, double d2)
+    public void addData(double d0,double d1, double d2)
     {
     	pos++; //next x position
     	if(pos >= length) //if exceeding bounds

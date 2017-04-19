@@ -10,7 +10,7 @@ import java.awt.Color;
  *@author	Andrew Errity 99086921
  * @author      Sherri Goings (modified 4/4/2017)
  */
-public class Prisoner implements Cloneable
+public class Prisoner implements Cloneable, Comparable<Prisoner>
 {
     private String name;
     
@@ -118,13 +118,23 @@ public class Prisoner implements Cloneable
 		temp.clear(0,71); //clear all bits (all D)
 		Strategy = temp;
 	    }
-	else 
-	    Strategy = null;
+	else {
+		Strategy = null;
+	}
 		
 	Score= 0;
 	m = new Moves();
     }
-	
+
+    /* Overrides default compareTo method, so that in fitness proportionate selection,
+       sort could sort the prisoners in a descending order (with regards to fitness score)*/
+    @Override
+	public int compareTo(Prisoner p) {
+		if(this.getScore() < p.getScore()) return 1;
+		else if (this.getScore() == p.getScore()) return 0;
+		else return -1;
+	}
+
     /**
      *Adds value to the Prisoner's current score
      *@param s the value to be added

@@ -35,7 +35,7 @@ public class SpatialPanel extends JPanel implements ActionListener
 	
 	private SwingWorker worker;	//used to multithread the spatial evolution
 	private boolean stopped;
-	private int max, min, total;
+	private double max, min, total;
 	private double avg;
 	
 	
@@ -188,8 +188,8 @@ public class SpatialPanel extends JPanel implements ActionListener
 				*/
 
 		//HTML Labels
-		minLbl = new JLabel("<html><font color=#6B238E>Minimum Payoff: " +  (new Integer(min)).toString() + "</font>");
-		maxLbl = new JLabel("<html><font color=#CFB53B>Maximum Payoff: " + (new Integer(max)).toString() + "</font>" );
+		minLbl = new JLabel("<html><font color=#6B238E>Minimum Payoff: " +  (new Double(min)).toString() + "</font>");
+		maxLbl = new JLabel("<html><font color=#CFB53B>Maximum Payoff: " + (new Double(max)).toString() + "</font>" );
 		avgLbl = new JLabel("<html><font color=#215E21>Average Payoff: " + (new Double(avg)).toString() + "</font>");
 	
 		statsPanel = new JPanel();
@@ -358,7 +358,7 @@ public class SpatialPanel extends JPanel implements ActionListener
 					grid.setRules(r1);
 					grid.setPlayers(pris);
 					grid.Play(); //initialisation **may be slow with >75^2 players
-					int [][] scores;
+					double [][] scores;
 					//Evolve the set number of generations
 		           	for(int g = 0; g < gen; g++)
 					{	

@@ -33,7 +33,7 @@ public class TournamentPanel extends JPanel implements ActionListener
 	private Rules rules;
 
 	private boolean stopped;
-	private int max, min, total;
+	private double max, min, total;
 	private double avg;
 	private Breeder b1;	//responsible for displaying the prisoners and evolution
 	
@@ -167,8 +167,8 @@ public class TournamentPanel extends JPanel implements ActionListener
 				*/
 
 		//HTML Labels
-		minLbl = new JLabel("<html><font color=#6B238E>Minimum Payoff: " +  (new Integer(min)).toString() + "</font>");
-		maxLbl = new JLabel("<html><font color=#CFB53B>Maximum Payoff: " + (new Integer(max)).toString() + "</font>" );
+		minLbl = new JLabel("<html><font color=#6B238E>Minimum Payoff: " +  (new Double(min)).toString() + "</font>");
+		maxLbl = new JLabel("<html><font color=#CFB53B>Maximum Payoff: " + (new Double(max)).toString() + "</font>" );
 		avgLbl = new JLabel("<html><font color=#215E21>Average Payoff: " + (new Double(avg)).toString() + "</font>");
 	
 		statsPanel = new JPanel();

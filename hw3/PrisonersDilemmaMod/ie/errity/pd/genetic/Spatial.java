@@ -25,8 +25,8 @@ import java.awt.event.*;
 public class Spatial extends JPanel
 {
     private Prisoner [][] world;	//Prisoners in the world
-    private int[][] scores;			//Raw Fitness value for each player
-    private int[][] scaledScores;	//Scaled Fitness value for each player
+    private double[][] scores;			//Raw Fitness value for each player
+    private double[][] scaledScores;	//Scaled Fitness value for each player
     private Hashtable matches;		//Record results of individual matches 
     //(decrease redundant calculation, improves speed)
     private Rules rules;			//Game Rules
@@ -43,8 +43,8 @@ public class Spatial extends JPanel
     public Spatial()
     {
 	super();
-	scores = new int[X][Y];
-	scaledScores = new int[X][Y];
+	scores = new double[X][Y];
+	scaledScores = new double[X][Y];
 	matches = new Hashtable();
 			
 	lastP = new int[2];	
@@ -68,8 +68,8 @@ public class Spatial extends JPanel
 	rules = r;
 	X = world.length;
 	Y = world[0].length;
-	scores = new int[X][Y];
-	scaledScores = new int[X][Y];
+	scores = new double[X][Y];
+	scaledScores = new double[X][Y];
 	matches = new Hashtable();
 			
 	lastP = new int[2];	
@@ -344,7 +344,7 @@ public class Spatial extends JPanel
      *Get all player's scores
      *@return an array containing the player's scores
      */
-    public int[][] getScores(){ return scores;}
+    public double[][] getScores(){ return scores;}
 	
     /**
      *Evolve a new generation using a Genetic algorithm
@@ -464,7 +464,7 @@ public class Spatial extends JPanel
 	    y_plus = 0;
 		
 		
-	int max = scaledScores[x][y_minus];
+	double max = scaledScores[x][y_minus];
 	int index[] = new int[2];
 	index = new int[]{x,y_minus};
 		
@@ -543,7 +543,7 @@ public class Spatial extends JPanel
 	    y_plus = 0;
 		
 		
-	int min = scaledScores[x][y_minus];
+	double min = scaledScores[x][y_minus];
 	int index[] = new int[2];
 	index = new int[]{x,y_minus};
 		
@@ -731,8 +731,8 @@ public class Spatial extends JPanel
 	world = p;
 	X = world.length;
 	Y = world[0].length;
-	scores = new int[X][Y];
-	scaledScores = new int[X][Y];
+	scores = new double[X][Y];
+	scaledScores = new double[X][Y];
 	matches = new Hashtable();
 			
 	lastP = new int[2];	

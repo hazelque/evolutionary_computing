@@ -107,6 +107,17 @@ public class Breeder extends JPanel
 			}
 		}
 
+		/* fitness proportional selection with sigma scaling and stochastic
+		universal sampling, plus optional elitism. */
+		else if(selection == 1) {
+			Selected = fitnessProportionateSelection(curPopulation, selParam);
+		}
+
+		/* tournament selection */
+		else if(selection == 2) {
+			Selected = tournamentSelection(curPopulation, selParam);
+		}
+
 		else {  // any other selection method fill pop with always cooperate
 			for (int i=0; i<popSize; i++)
 			Selected[i] = new Prisoner("ALLC");
@@ -148,27 +159,25 @@ public class Breeder extends JPanel
 		return curPopulation; //return the bred population
     }
 
-
 	/**
 	 * Enables fitness proportional selection with sigma scaling and stochastic
-	 * universal sampling, plus optional elitism.
-	 * @param m - number of most fit individuals to be copied over into the next
-	 *          generation
-     * @param c - initial population
+	 * universal sampling, plus optional elitism
+	 * @param c - initial population
+	 * @param m - elitism disabled if m is 0. otherwise, number of most fit
+	 *          individuals to be copied over into the next generation
 	 */
-	public void fitnessProportionateSelection(int m, Prisoner[] c) {
-		curPopulation = c;
-		popSize = curPopulation.length;
+	public Prisoner[] fitnessProportionateSelection(Prisoner[] c, int m) {
+		popSize = c.length;
 		Prisoner Selected[] = new Prisoner[popSize];
 
 		// When elitism is enabled
-		if(selParam == 1) {
-			Prisoner Elite[] = new Prisoner[m];
-			Collections.sort(curPopulation, Collections.reverseOrder());
-			System.arraycopy(curPopulation, 0, Elite,0 ,m);
-            for(int i = 0; i < m; i++) {
-                System.out.println(Elite[i].getScore());
-            }
+		if(m != 0) {
+			Arrays.sort(c);
+			Prisoner Elite[];
+			Elite = Arrays.copyOfRange(c, 0, m);
+			for(int i = 0; i < m; i++) {
+				Selected[i] = Elite[i];
+			}
 		}
 
         /* re-evaluate the fitnesses of all individuals using the sigma scaling
@@ -177,45 +186,69 @@ public class Breeder extends JPanel
         // calculating the mean fitness
         double totalFitness = 0;
 		for(int i = 0; i < popSize; i++) {
-		    totalFitness += curPopulation[i].getScore();
+		    totalFitness += c[i].getScore();
         }
         double meanFitness = totalFitness / popSize;
 
 		// calculate the variance and standard deviation
         double sumFitnessDiff = 0;
         for(int i = 0; i < popSize; i++) {
-            sumFitnessDiff += Math.pow(curPopulation[i].getScore() - meanFitness, 2);
+            sumFitnessDiff += Math.pow(c[i].getScore() - meanFitness, 2);
         }
         double variance = sumFitnessDiff / popSize;
         double std_deviation = Math.sqrt(variance);
 
         // set fitness to new scaled fitness
         for(int i = 0; i < popSize; i++) {
-            double newFitness = (curPopulation[i].getScore() - meanFitness) /
+            double newFitness = (c[i].getScore() - meanFitness) /
                     (2 * std_deviation);
-            curPopulation[i].setScore(newFitness);
+            c[i].setScore(newFitness);
         }
 
         /* fitness proportional selection with stochastic universal sampling */
+		// calculating the distance between pointers
         double newTotalFitness = 0;
         for(int i = 0; i < popSize; i++) {
-            newTotalFitness += curPopulation[i].getScore();
+            newTotalFitness += c[i].getScore();
         }
         int numOffsprings = popSize - m;
         double pointerDistance = newTotalFitness / numOffsprings;
 
-        /* setting a random starting point */
+        // setting a random starting point
         Random r = new Random();
 		double startPos = pointerDistance * r.nextDouble();
 
-		/* generate N equally spaced pointers */
-		double[] pointers = new double[numOffsprings];
+		// generate N equally spaced pointers
+		Prisoner[] individuals = new Prisoner[numOffsprings];
+		int index = 0;
+		double sum = c[index].getScore();
+
 		for(int i = 0; i < numOffsprings; i++) {
 			double curPointer = startPos + i * pointerDistance;
-			pointers[i] = curPointer;
+			if(sum >= curPointer) {
+				individuals[i] = c[index];
+			} else {
+				for(++index; index < popSize; index++) {
+					sum += c[index].getScore();
+					if(sum >= curPointer) {
+						individuals[i] = c[index];
+						break;
+					}
+				}
+			}
 		}
 
-		return RouletteWheelSelection(curPopulation, pointers);
+		for(int i = m; i < popSize; i++) Selected[i] = individuals[i-m];
+		return Selected;
+
+//		for(int i = 0; i < numOffsprings; i++) {
+//			double curPointer = startPos + i * pointerDistance;
+//			pointers[i] = curPointer;
+//		}
+//
+//		Prisoner RWSSelected[] = RouletteWheelSelection(c, pointers);
+//		for(int i = m; i < popSize; i++) Selected[i] = RWSSelected[i-m];
+//		return Selected;
 	}
 
     /**
@@ -225,10 +258,21 @@ public class Breeder extends JPanel
      * @return
      */
 	public Prisoner[] RouletteWheelSelection(Prisoner[] pop, double[] pointers) {
-
-		Prisoner Keep[] = new Prisoner[pop];
-
-
+		int pop_size = pop.length;
+		Prisoner Keep[] = new Prisoner[pop_size];
+		for (int curPos = 0; curPos < pointers.length; curPos++) {
+			double p = pointers[curPos];
+			int curPrisoner = 0;
+			double fitSum = 0;
+			while(fitSum < p) {
+				fitSum = 0;
+				for (int i = 0; i < curPrisoner; i++) {
+					fitSum += pop[curPrisoner].getScore();
+				}
+				curPrisoner++;
+			}
+			Keep[curPos] = pop[curPrisoner];
+		}
 	    return Keep;
     }
 
@@ -249,13 +293,23 @@ public class Breeder extends JPanel
 			for(int j = 0; j < k ; j++) {
 				Random rand = new Random();
 				int value = rand.nextInt(popSize);
-				if (!Arrays.asList(round).contains(curPopulation[value])) {
-					round[j] = curPopulation[value];
+				while (Arrays.asList(round).contains(curPopulation[value]) && value < popSize-1) {
+					value++;
 				}
+				round[j] = curPopulation[value];
 			}
 			// after picking k unique individuals, find the individual with the highest fitness
+			double maxFit = 0;
+			int indexBest = 0;
+			for (int m = 0; m < k; m++) {
+				if (round[m].getScore() > maxFit) {
+					maxFit = round[m].getScore();
+					indexBest = m;
+				}
+			}
+			// adding the individual with the highest fitness to the list of individuals to keep
+			keep[i] = round[indexBest];
 		}
-
 		return keep;
     }
 
