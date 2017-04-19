@@ -176,7 +176,7 @@ public class Breeder extends JPanel
 			Prisoner Elite[];
 			Elite = Arrays.copyOfRange(c, 0, m);
 			for(int i = 0; i < m; i++) {
-				Selected[i] = Elite[i];
+				Selected[i] = (Prisoner) Elite[i].clone();
 			}
 		}
 
@@ -200,9 +200,14 @@ public class Breeder extends JPanel
 
         // set fitness to new scaled fitness
         for(int i = 0; i < popSize; i++) {
-            double newFitness = (c[i].getScore() - meanFitness) /
-                    (2 * std_deviation);
-            c[i].setScore(newFitness);
+        	if(std_deviation != 0) {
+				double newFitness = (c[i].getScore() - meanFitness) /
+						(2 * std_deviation);
+				if(newFitness <= 0) c[i].setScore(0.01);
+				else c[i].setScore(newFitness);
+			} else {
+        		c[i].setScore(1.0);
+			}
         }
 
         /* fitness proportional selection with stochastic universal sampling */
@@ -211,6 +216,7 @@ public class Breeder extends JPanel
         for(int i = 0; i < popSize; i++) {
             newTotalFitness += c[i].getScore();
         }
+
         int numOffsprings = popSize - m;
         double pointerDistance = newTotalFitness / numOffsprings;
 
@@ -238,43 +244,9 @@ public class Breeder extends JPanel
 			}
 		}
 
-		for(int i = m; i < popSize; i++) Selected[i] = individuals[i-m];
+		for(int i = m; i < popSize; i++) Selected[i] = (Prisoner)individuals[i-m].clone();
 		return Selected;
-
-//		for(int i = 0; i < numOffsprings; i++) {
-//			double curPointer = startPos + i * pointerDistance;
-//			pointers[i] = curPointer;
-//		}
-//
-//		Prisoner RWSSelected[] = RouletteWheelSelection(c, pointers);
-//		for(int i = m; i < popSize; i++) Selected[i] = RWSSelected[i-m];
-//		return Selected;
 	}
-
-    /**
-     * A helper function used for FPS with SUS
-     * @param pop
-     * @param pointers
-     * @return
-     */
-	public Prisoner[] RouletteWheelSelection(Prisoner[] pop, double[] pointers) {
-		int pop_size = pop.length;
-		Prisoner Keep[] = new Prisoner[pop_size];
-		for (int curPos = 0; curPos < pointers.length; curPos++) {
-			double p = pointers[curPos];
-			int curPrisoner = 0;
-			double fitSum = 0;
-			while(fitSum < p) {
-				fitSum = 0;
-				for (int i = 0; i < curPrisoner; i++) {
-					fitSum += pop[curPrisoner].getScore();
-				}
-				curPrisoner++;
-			}
-			Keep[curPos] = pop[curPrisoner];
-		}
-	    return Keep;
-    }
 
     /**
      * Enables tournament selection
@@ -308,7 +280,7 @@ public class Breeder extends JPanel
 				}
 			}
 			// adding the individual with the highest fitness to the list of individuals to keep
-			keep[i] = round[indexBest];
+			keep[i] = (Prisoner)round[indexBest].clone();
 		}
 		return keep;
     }
